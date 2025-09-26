@@ -19,14 +19,19 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddConfigureMediatR(this IServiceCollection services)
     {
-        services.AddMediatR(config => config.RegisterServicesFromAssemblies(
+        services.AddMediatR(config => 
+        {
+            config.RegisterServicesFromAssemblies(
                 typeof(Application.AssemblyReference).Assembly,
                 typeof(Infrastructure.AssemblyReference).Assembly
-            ))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(IdempotencyBehavior<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>))
-            .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainEventDispatcherBehavior<,>))
-            .AddValidatorsFromAssembly(Contracts.AssemblyReference.Assembly, includeInternalTypes: true);
+            );
+            
+            // Performance optimizations - using default publisher for better performance
+        })
+        .AddTransient(typeof(IPipelineBehavior<,>), typeof(IdempotencyBehavior<,>))
+        .AddTransient(typeof(IPipelineBehavior<,>), typeof(TransactionBehavior<,>))
+        .AddTransient(typeof(IPipelineBehavior<,>), typeof(DomainEventDispatcherBehavior<,>))
+        .AddValidatorsFromAssembly(Contracts.AssemblyReference.Assembly, includeInternalTypes: true);
 
         return services;
     }
@@ -40,6 +45,9 @@ public static class ServiceCollectionExtensions
         services.AddCarter();
 
         services.AddScoped<ExceptionHandlingMiddleware>();
+        services.AddScoped<PerformanceMonitoringMiddleware>();
+        services.AddScoped<MemoryOptimizationMiddleware>();
+        services.AddMemoryCache();
 
         services.AddSwaggerServices();
 

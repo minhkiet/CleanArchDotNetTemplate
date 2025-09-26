@@ -50,13 +50,19 @@ public class UnitOfWork : IUnitOfWork, IDisposable
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var date = DateTime.UtcNow;
-        foreach (var entry in _dbContext.ChangeTracker.Entries<IBaseEntity>())
+        var entries = _dbContext.ChangeTracker.Entries<IBaseEntity>();
+        
+        // Optimize by checking if there are any entries to process
+        if (entries.Any())
         {
-            if (entry.State == EntityState.Added)
-                entry.Entity.CreatedAt = date;
+            foreach (var entry in entries)
+            {
+                if (entry.State == EntityState.Added)
+                    entry.Entity.CreatedAt = date;
 
-            if (entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.HasChangedOwnedEntities())
-                entry.Entity.ModifiedAt = date;
+                if (entry.State == EntityState.Added || entry.State == EntityState.Modified || entry.HasChangedOwnedEntities())
+                    entry.Entity.ModifiedAt = date;
+            }
         }
 
         return await _dbContext.SaveChangesAsync(cancellationToken);

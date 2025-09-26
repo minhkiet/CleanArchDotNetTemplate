@@ -16,7 +16,19 @@ public static class ServiceCollectionExtensions
 
         services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseSqlite(databaseSettings.ConnectionString);
+            options.UseSqlite(databaseSettings.ConnectionString, sqliteOptions =>
+            {
+                sqliteOptions.CommandTimeout(30);
+            });
+            
+            // Performance optimizations
+            options.EnableSensitiveDataLogging(false);
+            options.EnableDetailedErrors(false);
+            options.EnableServiceProviderCaching();
+            options.EnableThreadSafetyChecks();
+            
+            // Query optimization
+            options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         });
 
         return services;

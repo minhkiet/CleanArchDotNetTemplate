@@ -17,6 +17,8 @@ public static class MiddlewareExtensions
     app.NewVersionedApi()
       .MapExampleEndpointApiV1();
 
+    app.UseMiddleware<PerformanceMonitoringMiddleware>();
+    app.UseMiddleware<MemoryOptimizationMiddleware>();
     app.UseMiddleware<ExceptionHandlingMiddleware>();
 
     app.UseHttpsRedirection();
